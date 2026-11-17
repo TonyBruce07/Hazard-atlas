@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Send, Loader, FlaskConical, CircleAlert, RotateCcw } from 'lucide-react'
+import { Send, Loader, Info, CircleAlert, RotateCcw } from 'lucide-react'
 import Button from '../ui/Button.jsx'
 import FormField from '../ui/FormField.jsx'
 import FormSection from './FormSection.jsx'
@@ -8,7 +8,7 @@ import LocationFields from './LocationFields.jsx'
 import PhotoUpload from './PhotoUpload.jsx'
 import ReportSuccess from './ReportSuccess.jsx'
 import useGeolocation from '../../hooks/useGeolocation.js'
-import { submitHazardReport } from '../../services/reportService.js'
+import { submitHazardReport, ReportSubmissionError } from '../../services/reportService.js'
 import { DESCRIPTION_LIMITS } from '../../data/reportOptions.js'
 import {
   FIELD_ORDER,
@@ -27,7 +27,7 @@ export default function ReportForm() {
   const [attempted, setAttempted] = useState(false)
   const [status, setStatus] = useState('idle') // 'idle' | 'submitting' | 'success'
   const [submitError, setSubmitError] = useState('')
-  const [submission, setSubmission] = useState(null) // { result, report }
+  const [submission, setSubmission] = useState(null) // the API's 201 response
   const geo = useGeolocation()
 
   const submitting = status === 'submitting'
@@ -106,12 +106,31 @@ export default function ReportForm() {
 
     setStatus('submitting')
     setSubmitError('')
+    // Clear a previous server-side photo complaint; client-side photo errors have no file attached
+    setPhoto((prev) => (prev.file ? { ...prev, error: '' } : prev))
+
     try {
-      const result = await submitHazardReport(report)
-      setSubmission({ result, report })
+      const created = await submitHazardReport(report)
+      setSubmission(created)
       setStatus('success')
-    } catch {
-      setSubmitError("We couldn't process your report. Please check your connection and try again.")
+    } catch (error) {
+      // Everything the user typed stays in state; only the messages change.
+      const failure =
+        error instanceof ReportSubmissionError
+          ? error
+          : new ReportSubmissionError('Something unexpected happened. Please try again.')
+
+      setSubmitError(failure.message)
+      if (failure.photoError) setPhoto((prev) => ({ ...prev, error: failure.photoError }))
+
+      const serverFieldErrors = failure.fieldErrors
+      if (Object.keys(serverFieldErrors).length > 0) {
+        setErrors(serverFieldErrors)
+        const firstInvalid = FIELD_ORDER.find((name) => serverFieldErrors[name])
+        requestAnimationFrame(() => {
+          document.querySelector(`[name="${firstInvalid}"]`)?.focus()
+        })
+      }
       setStatus('idle')
     }
   }
@@ -129,7 +148,7 @@ export default function ReportForm() {
   }
 
   if (status === 'success' && submission) {
-    return <ReportSuccess result={submission.result} report={submission.report} onReset={handleReset} />
+    return <ReportSuccess result={submission} onReset={handleReset} />
   }
 
   const length = values.description.length
@@ -137,11 +156,11 @@ export default function ReportForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate aria-busy={submitting}>
-      <div className="alert alert--warning" role="note">
-        <FlaskConical size={20} className="alert__icon" aria-hidden="true" />
+      <div className="alert alert--info" role="note">
+        <Info size={20} className="alert__icon" aria-hidden="true" />
         <p>
-          <strong>Demo mode.</strong> The backend is not connected yet. Submitting only checks your
-          input. Nothing is saved, and nothing is sent to any authority.
+          Your report is saved to the local HazardAtlas system. It is not sent to a municipality or
+          authority yet.
         </p>
       </div>
 
@@ -206,7 +225,7 @@ export default function ReportForm() {
           />
         </FormSection>
 
-        {attempted && hasErrors && (
+        {attempted && hasErrors && !submitError && (
           <div className="alert alert--error" role="alert">
             <CircleAlert size={20} className="alert__icon" aria-hidden="true" />
             <p>Please fix the highlighted fields before submitting.</p>
@@ -228,7 +247,7 @@ export default function ReportForm() {
             className={submitting ? 'is-loading' : ''}
             disabled={submitting}
           >
-            {submitting ? 'Processing…' : 'Submit report (demo)'}
+            {submitting ? 'Submitting…' : 'Submit report'}
           </Button>
           <Button variant="outline" icon={RotateCcw} iconPosition="start" onClick={handleReset}>
             Clear form

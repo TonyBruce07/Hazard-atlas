@@ -23,3 +23,9 @@ export const REPORT_TIPS = [
   'Describe the size and the danger, for example "deep enough to damage a tyre".',
   'Add a clear, well-lit photo if you can. Try to avoid capturing faces or number plates.',
 ]
+
+export const HAZARD_STATUS_LABELS = {
+  open: 'Open',
+  in_progress: 'In progress',
+  resolved: 'Resolved',
+}

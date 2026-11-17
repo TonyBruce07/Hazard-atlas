@@ -1,39 +1,51 @@
 import { useEffect, useRef } from 'react'
-import { CircleCheck, FlaskConical, RotateCcw, ArrowLeft } from 'lucide-react'
+import { CircleCheck, Info, RotateCcw, ArrowLeft } from 'lucide-react'
 import Button from '../ui/Button.jsx'
-import { HAZARD_CATEGORIES } from '../../data/reportOptions.js'
+import { HAZARD_CATEGORIES, HAZARD_STATUS_LABELS } from '../../data/reportOptions.js'
 
-/** Clearly-labelled DEMO confirmation. Nothing has been saved or sent. */
-export default function ReportSuccess({ result, report, onReset }) {
+function formatDateTime(isoString) {
+  const date = new Date(isoString)
+  return Number.isNaN(date.getTime()) ? null : date.toLocaleString()
+}
+
+/** Confirmation built from the backend's real 201 response. */
+export default function ReportSuccess({ result, onReset }) {
   const headingRef = useRef(null)
 
   useEffect(() => {
     headingRef.current?.focus()
   }, [])
 
-  const category = HAZARD_CATEGORIES.find((c) => c.value === report.category)?.label ?? report.category
-  const hasCoords = report.latitude !== null && report.longitude !== null
+  const hazard = result.hazard
+  const category =
+    HAZARD_CATEGORIES.find((c) => c.value === hazard?.hazard_type)?.label ?? hazard?.hazard_type ?? 'Unknown'
+  const location = hazard ? [hazard.address, hazard.city].filter(Boolean).join(', ') : 'Not available'
+  const hasCoordinates = hazard && hazard.latitude !== null && hazard.longitude !== null
+  const status = HAZARD_STATUS_LABELS[hazard?.status] ?? hazard?.status ?? 'Unknown'
+  const submittedAt = formatDateTime(result.created_at)
 
   const rows = [
-    ['Category', category],
-    ['Location', `${report.street}, ${report.city}`],
-    ...(hasCoords ? [['Coordinates', `${report.latitude}, ${report.longitude}`]] : []),
-    ['Photo', report.photo ? report.photo.name : 'No photo attached'],
-    ['Demo reference', result.referenceId],
+    ['Report ID', String(result.id)],
+    ['Hazard ID', result.hazard_id !== null && result.hazard_id !== undefined ? String(result.hazard_id) : 'Not linked yet'],
+    ['Hazard category', category],
+    ['Location', location],
+    ...(hasCoordinates ? [['Coordinates', `${hazard.latitude}, ${hazard.longitude}`]] : []),
+    ['Current status', status],
+    ['Photo', result.photo_path ? 'Attached' : 'No photo attached'],
+    ...(submittedAt ? [['Submitted', submittedAt]] : []),
   ]
 
   return (
     <div className="report-success">
       <span className="icon-tile icon-tile--navy icon-tile--lg"><CircleCheck size={30} aria-hidden="true" /></span>
-      <span className="placeholder__badge">Demo submission</span>
-      <h2 ref={headingRef} tabIndex={-1}>Demo complete: your report was validated</h2>
+      <span className="placeholder__badge">Submitted</span>
+      <h2 ref={headingRef} tabIndex={-1}>Your report was submitted</h2>
 
-      <div className="alert alert--warning" role="note">
-        <FlaskConical size={20} className="alert__icon" aria-hidden="true" />
+      <div className="alert alert--info" role="status">
+        <Info size={20} className="alert__icon" aria-hidden="true" />
         <p>
-          <strong>Nothing was saved or sent.</strong> HazardAtlas does not have a backend yet, so this
-          report has not been stored and no authority has received it. The reference below is a demo
-          placeholder, not a tracking number.
+          <strong>Your report was successfully submitted to the local HazardAtlas system.</strong> It has
+          been saved. No municipality or authority has been notified yet.
         </p>
       </div>
 

@@ -76,4 +76,6 @@
 .alert__icon { flex-shrink: 0; margin-top: 0.1rem; }
 .alert--warning { border-color: #ffd0b3; background: var(--orange-tint); color: var(--navy-900); }
 .alert--warning .alert__icon { color: var(--orange-700); }
+.alert--info { border-color: #c9d6ea; background: #eef3fa; color: var(--navy-900); }
+.alert--info .alert__icon { color: var(--navy-700); }
 .alert--error { border-color: var(--error-border); background: var(--error-bg); color: var(--error); font-weight: 500; }
