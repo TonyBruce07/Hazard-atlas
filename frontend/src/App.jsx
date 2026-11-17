@@ -1,7 +1,8 @@
 import { Routes, Route } from 'react-router-dom'
-import { Camera, Map, LayoutDashboard, Compass } from 'lucide-react'
+import { Map, LayoutDashboard, Compass } from 'lucide-react'
 import Layout from './components/layout/Layout.jsx'
 import Home from './pages/Home.jsx'
+import ReportHazard from './pages/ReportHazard.jsx'
 import PlaceholderPage from './pages/PlaceholderPage.jsx'
 
 export default function App() {
@@ -9,16 +10,7 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Home />} />
-        <Route
-          path="report"
-          element={
-            <PlaceholderPage
-              icon={Camera}
-              title="Report a Hazard"
-              description="The hazard reporting flow is coming soon. Citizens will be able to add a photo, pin a location and describe the problem."
-            />
-          }
-        />
+        <Route path="report" element={<ReportHazard />} />
         <Route
           path="map"
           element={

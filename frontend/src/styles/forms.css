@@ -1,0 +1,79 @@
+/* Reusable form primitives: fields, inputs, alerts */
+
+.field { display: grid; gap: 0.4rem; min-width: 0; align-content: start; }
+
+.field__label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--navy-900);
+}
+.field__req { color: var(--orange-700); }
+.field__optional {
+  padding: 0.05rem 0.55rem;
+  border-radius: 999px;
+  background: var(--gray-100);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--gray-500);
+}
+.field__hint { font-size: 0.86rem; color: var(--gray-500); }
+
+.field__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--error);
+}
+.field__error svg { flex-shrink: 0; margin-top: 0.1rem; }
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 10px;
+  background: var(--white);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--navy-900);
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.textarea { resize: vertical; min-height: 7.5rem; }
+.input::placeholder,
+.textarea::placeholder { color: #7b8aa0; }
+.input:hover,
+.textarea:hover { border-color: var(--gray-500); }
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--navy-900);
+  box-shadow: 0 0 0 3px rgba(255, 107, 26, 0.4);
+}
+.input[aria-invalid='true'],
+.textarea[aria-invalid='true'] { border-color: var(--error); background: var(--error-bg); }
+.input:disabled,
+.textarea:disabled { background: var(--gray-50); cursor: not-allowed; }
+
+/* Alerts */
+.alert {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid;
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.alert__icon { flex-shrink: 0; margin-top: 0.1rem; }
+.alert--warning { border-color: #ffd0b3; background: var(--orange-tint); color: var(--navy-900); }
+.alert--warning .alert__icon { color: var(--orange-700); }
+.alert--error { border-color: var(--error-border); background: var(--error-bg); color: var(--error); font-weight: 500; }

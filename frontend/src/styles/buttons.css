@@ -44,3 +44,18 @@
   background: var(--white);
 }
 .btn--outline:hover { border-color: var(--navy-900); }
+
+/* Small size, disabled and loading states (used by forms) */
+.btn--sm { padding: 0.6rem 1rem; font-size: 0.9rem; }
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn.is-loading .btn__icon { animation: spin 1s linear infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }

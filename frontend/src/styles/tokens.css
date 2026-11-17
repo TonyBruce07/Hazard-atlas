@@ -21,6 +21,11 @@
   --on-navy: #c5d1e3;
   --on-navy-muted: #8fa3c0;
 
+  /* Feedback */
+  --error: #b42318;
+  --error-bg: #fef3f2;
+  --error-border: #fda29b;
+
   /* Type */
   --font-heading: 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-body: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
