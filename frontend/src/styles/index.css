@@ -1,0 +1,11 @@
+/* Fonts (graceful fallbacks are defined in tokens.css) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap');
+
+@import './tokens.css';
+@import './base.css';
+@import './buttons.css';
+@import './navbar.css';
+@import './hero.css';
+@import './sections.css';
+@import './footer.css';
+@import './placeholder.css';

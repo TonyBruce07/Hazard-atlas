@@ -1,0 +1,46 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.85rem 1.4rem;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+
+.btn__icon { transition: transform 0.15s; }
+.btn:hover .btn__icon--end { transform: translateX(3px); }
+.btn:hover .btn__icon--start { transform: translateX(-2px); }
+
+/* Orange with navy text keeps strong contrast (white-on-orange does not) */
+.btn--primary {
+  background: var(--orange-500);
+  color: var(--navy-950);
+  box-shadow: 0 8px 20px -8px rgba(255, 107, 26, 0.6);
+}
+.btn--primary:hover { background: var(--orange-400); }
+
+.btn--ghost-dark {
+  color: var(--white);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.btn--ghost-dark:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.btn--outline {
+  color: var(--navy-900);
+  border-color: var(--gray-200);
+  background: var(--white);
+}
+.btn--outline:hover { border-color: var(--navy-900); }

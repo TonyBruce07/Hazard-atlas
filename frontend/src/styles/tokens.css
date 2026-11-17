@@ -1,0 +1,38 @@
+:root {
+  /* Navy */
+  --navy-950: #071528;
+  --navy-900: #0b1f3a;
+  --navy-800: #112a4d;
+  --navy-700: #1b3a66;
+
+  /* Safety orange */
+  --orange-500: #ff6b1a;
+  --orange-400: #ff8442;
+  --orange-700: #b84508; /* accessible orange for text on white */
+  --orange-tint: #fff1e8;
+
+  /* Neutrals */
+  --white: #ffffff;
+  --gray-50: #f5f7fa;
+  --gray-100: #eaeff5;
+  --gray-200: #d9e1ec;
+  --gray-500: #5b6b82;
+  --gray-700: #33455f;
+  --on-navy: #c5d1e3;
+  --on-navy-muted: #8fa3c0;
+
+  /* Type */
+  --font-heading: 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  /* Shape + elevation */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --shadow-sm: 0 1px 2px rgba(11, 31, 58, 0.06);
+  --shadow-md: 0 14px 30px -14px rgba(11, 31, 58, 0.25);
+
+  /* Layout */
+  --container: 1180px;
+  --nav-h: 72px;
+}
