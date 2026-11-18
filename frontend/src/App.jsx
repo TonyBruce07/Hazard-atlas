@@ -1,3 +1,4 @@
+import HazardMap from './components/HazardMap.jsx'
 import { Routes, Route } from 'react-router-dom'
 import { Map, LayoutDashboard, Compass } from 'lucide-react'
 import Layout from './components/layout/Layout.jsx'
@@ -11,16 +12,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="report" element={<ReportHazard />} />
-        <Route
-          path="map"
-          element={
-            <PlaceholderPage
-              icon={Map}
-              title="Explore Map"
-              description="The interactive hazard map is coming soon. You will be able to browse reports and hotspots across the city."
-            />
-          }
-        />
+        <Route path="map" element={<HazardMap />} />
         <Route
           path="dashboard"
           element={
