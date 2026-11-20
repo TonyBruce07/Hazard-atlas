@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { CircleCheck, Info, RotateCcw, ArrowLeft } from 'lucide-react'
 import Button from '../ui/Button.jsx'
 import { HAZARD_CATEGORIES, HAZARD_STATUS_LABELS } from '../../data/reportOptions.js'
+import '../../pages/TrackReport.css'
 
 function formatDateTime(isoString) {
   const date = new Date(isoString)
@@ -25,7 +26,7 @@ export default function ReportSuccess({ result, onReset }) {
   const submittedAt = formatDateTime(result.created_at)
 
   const rows = [
-    ['Report ID', String(result.id)],
+    ['Tracking code', result.tracking_code],
     ['Hazard ID', result.hazard_id !== null && result.hazard_id !== undefined ? String(result.hazard_id) : 'Not linked yet'],
     ['Hazard category', category],
     ['Location', location],
@@ -46,6 +47,15 @@ export default function ReportSuccess({ result, onReset }) {
         <p>
           <strong>Your report was successfully submitted to the local HazardAtlas system.</strong> It has
           been saved. No municipality or authority has been notified yet.
+        </p>
+      </div>
+      <div className="tracking-code-box">
+        <p className="tracking-code-box__label">Your report tracking code</p>
+        <strong className="tracking-code-box__code">
+          {result.tracking_code}
+        </strong>
+        <p className="tracking-code-box__hint">
+          Save this code. You will need it to check your report status later.
         </p>
       </div>
 

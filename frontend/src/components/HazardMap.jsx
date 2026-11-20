@@ -5,6 +5,7 @@ import {
   TileLayer,
   CircleMarker,
   Popup,
+  Polyline,
   useMap,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -66,13 +67,162 @@ function FitReports({ reports }) {
 
   return null;
 }
+function SpiderfiedHotspot({ hotspot, expanded, onToggle }) {
+  const map = useMap();
+  const [positions, setPositions] = useState([]);
 
+  useEffect(() => {
+    if (!expanded) {
+      setPositions([]);
+      return;
+    }
+
+    const updatePositions = () => {
+      const center = map.latLngToLayerPoint([
+        hotspot.center.lat,
+        hotspot.center.lng,
+      ]);
+
+      const radius = 42;
+
+      const nextPositions = hotspot.reports.map((_, index) => {
+        const angle =
+          (2 * Math.PI * index) / hotspot.reports.length -
+          Math.PI / 2;
+
+        const point = map.layerPointToLatLng([
+          center.x + Math.cos(angle) * radius,
+          center.y + Math.sin(angle) * radius,
+        ]);
+
+        return [point.lat, point.lng];
+      });
+
+      setPositions(nextPositions);
+    };
+
+    updatePositions();
+
+    map.on("zoomend", updatePositions);
+    map.on("moveend", updatePositions);
+
+    return () => {
+      map.off("zoomend", updatePositions);
+      map.off("moveend", updatePositions);
+    };
+  }, [expanded, hotspot, map]);
+
+  return (
+    <>
+      {expanded &&
+        positions.map((position, index) => {
+          const report = hotspot.reports[index];
+          const hazard = getHazard(report);
+          const category = getCategory(report);
+
+          return (
+            <Polyline
+              key={`spider-leg-${report.id}`}
+              positions={[
+                [hotspot.center.lat, hotspot.center.lng],
+                position,
+              ]}
+              pathOptions={{
+                color: "#7c3aed",
+                weight: 1.5,
+                opacity: 0.7,
+              }}
+            />
+          );
+        })}
+
+      {expanded &&
+        positions.map((position, index) => {
+          const report = hotspot.reports[index];
+          const hazard = getHazard(report);
+          const category = getCategory(report);
+
+          return (
+            <CircleMarker
+              key={`spider-report-${report.id}`}
+              center={position}
+              radius={10}
+              pathOptions={{
+                color: "#ffffff",
+                weight: 2,
+                fillColor: getColor(category),
+                fillOpacity: 1,
+              }}
+             
+            >
+              <Popup>
+                <div className="hazard-popup">
+                  <strong>{category.replaceAll("_", " ")}</strong>
+                  <p>
+                    {report.description ||
+                      hazard.description ||
+                      "No description provided."}
+                  </p>
+                  <p>
+                    {report.street || hazard.address || "Unknown street"}
+                    {report.city || hazard.city
+                      ? `, ${report.city || hazard.city}`
+                      : ""}
+                  </p>
+                  <span>
+                    Status: {report.status || hazard.status || "Reported"}
+                  </span>
+                  <br />
+                  <span>Report ID: #{report.id}</span>
+                </div>
+              </Popup>
+            </CircleMarker>
+          );
+        })}
+
+      <CircleMarker
+        center={[hotspot.center.lat, hotspot.center.lng]}
+        radius={expanded ? 12 : 18}
+        pathOptions={{
+          color: "#ffffff",
+          weight: 3,
+          fillColor: "#7c3aed",
+          fillOpacity: 1,
+        }}
+        eventHandlers={{
+          click: () => onToggle(expanded ? null : hotspot.id),
+        }}
+      >
+        <Popup>
+          <div className="hazard-popup">
+            <strong>🔥 Hazard Hotspot</strong>
+            <p>
+              <strong>{hotspot.count}</strong> reports within a connected
+              100 m cluster
+            </p>
+            <span>
+              Reports:{" "}
+              {hotspot.reports
+                .map(report => `#${report.id}`)
+                .join(", ")}
+            </span>
+            <p>
+              {expanded
+                ? "Click the hotspot again to collapse the markers."
+                : "Click the purple hotspot marker to spread out individual reports."}
+            </p>
+          </div>
+        </Popup>
+      </CircleMarker>
+    </>
+  );
+}
 export default function HazardMap() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-
+  const [expandedHotspotId, setExpandedHotspotId] = useState(null);
   useEffect(() => {
     async function loadReports() {
       try {
@@ -159,65 +309,65 @@ export default function HazardMap() {
         <FitReports reports={filteredReports} />
         
 
-        {filteredReports.map((report) => {
-          const coordinates = getCoordinates(report);
-          const category = getCategory(report);
-          const hazard = getHazard(report);
+                {filteredReports
+          .filter(report => {
+            const expandedHotspot = hotspots.find(
+              hotspot => hotspot.id === expandedHotspotId
+            );
 
-          return (
-            <CircleMarker
-              key={report.id}
-              center={coordinates}
-              radius={9}
-              pathOptions={{
-                color: "#ffffff",
-                weight: 2,
-                fillColor: getColor(category),
-                fillOpacity: 0.9,
-              }}
-            >
-              <Popup>
-                <div className="hazard-popup">
-                  <strong>{category.replaceAll("_", " ")}</strong>
-                  <p>{report.description || hazard.description || "No description provided."}</p>
-                  <p>
-                  {report.street || hazard.address || "Unknown street"}
-                  {report.city || hazard.city
-                    ? `, ${report.city || hazard.city}`
-                    : ""}
-                  </p>
-                  <span>Status: {report.status || hazard.status || "Reported"}</span>
-                  <br />
-                  <span>Report ID: #{report.id}</span>
-                </div>
-              </Popup>
-            </CircleMarker>
-          );
-        })}
-        {hotspots.map((hotspot) => (
-  <CircleMarker
-    key={`hotspot-${hotspot.id}`}
-    center={[hotspot.center.lat, hotspot.center.lng]}
-    radius={18}
-    pathOptions={{
-      color: "#ffffff",
-      weight: 3,
-      fillColor: "#7c3aed",
-      fillOpacity: 1,
-    }}
-  >
-    <Popup>
-      <div className="hazard-popup">
-        <strong>🔥 Hazard Hotspot</strong>
-        <p>
-          <strong>{hotspot.count}</strong> reports within a connected
-          100 m cluster
-        </p>
-        <span>Reports: {hotspot.reports.map((report) => `#${report.id}`).join(", ")}</span>
-      </div>
-    </Popup>
-  </CircleMarker>
-))}
+            return !expandedHotspot?.reports.some(
+              item => item.id === report.id
+            );
+          })
+          .map(report => {
+            const coordinates = getCoordinates(report);
+            const category = getCategory(report);
+            const hazard = getHazard(report);
+
+            return (
+              <CircleMarker
+                key={report.id}
+                center={coordinates}
+                radius={9}
+                pathOptions={{
+                  color: "#ffffff",
+                  weight: 2,
+                  fillColor: getColor(category),
+                  fillOpacity: 0.9,
+                }}
+              >
+                <Popup>
+                  <div className="hazard-popup">
+                    <strong>{category.replaceAll("_", " ")}</strong>
+                    <p>
+                      {report.description ||
+                        hazard.description ||
+                        "No description provided."}
+                    </p>
+                    <p>
+                      {report.street || hazard.address || "Unknown street"}
+                      {report.city || hazard.city
+                        ? `, ${report.city || hazard.city}`
+                        : ""}
+                    </p>
+                    <span>
+                      Status: {report.status || hazard.status || "Reported"}
+                    </span>
+                    <br />
+                    <span>Report ID: #{report.id}</span>
+                  </div>
+                </Popup>
+              </CircleMarker>
+            );
+          })}
+                {hotspots.map(hotspot => (
+          <SpiderfiedHotspot
+            key={hotspot.id}
+            hotspot={hotspot}
+            expanded={expandedHotspotId === hotspot.id}
+            onToggle={setExpandedHotspotId}
+          />
+        ))}
       </MapContainer>
 
       <div className="hazard-map-legend">

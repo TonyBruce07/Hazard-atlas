@@ -25,6 +25,7 @@ const api = axios.create({ baseURL: API_BASE_URL, timeout: REQUEST_TIMEOUT_MS })
  * @property {string} city
  * @property {number|string|null} latitude
  * @property {number|string|null} longitude
+ * @property {string} reportedSeverity
  * @property {File|null} photo
  */
 
@@ -44,8 +45,14 @@ const api = axios.create({ baseURL: API_BASE_URL, timeout: REQUEST_TIMEOUT_MS })
 /* ------------------------------------------------------------------ */
 
 function toCoordinate(value) {
-  if (value === null || value === undefined || value === '') return null
-  const number = typeof value === 'number' ? value : Number(String(value).trim())
+  if (value === null || value === undefined) return null
+
+  const trimmed = String(value).trim()
+
+  if (!trimmed) return null
+
+  const number = Number(trimmed)
+
   return Number.isFinite(number) ? number : null
 }
 
@@ -56,7 +63,11 @@ export function buildReportFormData(report) {
   formData.append('description', report.description)
   formData.append('street', report.street)
   formData.append('city', report.city)
+  const severity = String(report.reportedSeverity || 'medium')
+  .trim()
+  .toLowerCase()
 
+formData.append('reported_severity', severity)
   // Coordinates are both sent or both omitted; the backend rejects a lone value.
   const latitude = toCoordinate(report.latitude)
   const longitude = toCoordinate(report.longitude)
@@ -229,4 +240,34 @@ export async function submitHazardReport(report) {
     throw new ReportSubmissionError(MESSAGES.unknown, { kind: 'unknown' })
   }
   return data
+}
+/**
+ * Look up a citizen report using its tracking code.
+ */
+export async function trackHazardReport(trackingCode) {
+  try {
+    const { data } = await api.get(
+      `${REPORTS_PATH}/track/${encodeURIComponent(
+        trackingCode.trim().toUpperCase()
+      )}`
+    )
+
+    return data
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        throw new Error(
+          'No report was found. Please check your tracking code.'
+        )
+      }
+
+      if (!error.response) {
+        throw new Error(
+          'Could not connect to HazardAtlas. Please try again.'
+        )
+      }
+    }
+
+    throw new Error('Unable to retrieve this report. Please try again.')
+  }
 }

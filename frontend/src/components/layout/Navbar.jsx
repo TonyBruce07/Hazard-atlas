@@ -43,18 +43,31 @@ export default function Navbar() {
           aria-label="Primary"
         >
           <ul className="navbar__links">
-            {NAV_LINKS.map(({ to, label, end }) => (
-              <li key={to}>
-                <NavLink
-                  to={to}
-                  end={end}
-                  className={({ isActive }) => `navbar__link${isActive ? ' is-active' : ''}`}
-                >
-                  {label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
+  {NAV_LINKS.map(({ to, label, end }) => (
+    <li key={to}>
+      <NavLink
+        to={to}
+        end={end}
+        className={({ isActive }) =>
+          `navbar__link${isActive ? ' is-active' : ''}`
+        }
+      >
+        {label}
+      </NavLink>
+    </li>
+  ))}
+
+  <li>
+    <NavLink
+      to="/track"
+      className={({ isActive }) =>
+        `navbar__link${isActive ? ' is-active' : ''}`
+      }
+    >
+      Track Report
+    </NavLink>
+  </li>
+</ul>
         </nav>
       </div>
     </header>

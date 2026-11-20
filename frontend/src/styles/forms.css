@@ -79,3 +79,49 @@
 .alert--info { border-color: #c9d6ea; background: #eef3fa; color: var(--navy-900); }
 .alert--info .alert__icon { color: var(--navy-700); }
 .alert--error { border-color: var(--error-border); background: var(--error-bg); color: var(--error); font-weight: 500; }
+
+/* Citizen severity selector */
+.form-select {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 42px 12px 14px;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  color: #172554;
+
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364758b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+
+.form-select:hover {
+  border-color: #94a3b8;
+}
+
+.form-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.form-select:disabled {
+  background-color: #f1f5f9;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.form-select option {
+  padding: 10px;
+  color: #172554;
+}

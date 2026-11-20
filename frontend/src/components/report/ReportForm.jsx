@@ -22,6 +22,7 @@ const NO_PHOTO = { file: null, error: '' }
 
 export default function ReportForm() {
   const [values, setValues] = useState(INITIAL_VALUES)
+  const [reportedSeverity, setReportedSeverity] = useState('medium')
   const [errors, setErrors] = useState({})
   const [photo, setPhoto] = useState(NO_PHOTO)
   const [attempted, setAttempted] = useState(false)
@@ -101,7 +102,9 @@ export default function ReportForm() {
       city: values.city.trim(),
       latitude: values.latitude.trim() ? Number(values.latitude) : null,
       longitude: values.longitude.trim() ? Number(values.longitude) : null,
+      reportedSeverity,
       photo: photo.file,
+
     }
 
     setStatus('submitting')
@@ -143,6 +146,7 @@ export default function ReportForm() {
     setSubmitError('')
     setSubmission(null)
     setStatus('idle')
+    setReportedSeverity('medium')
     geo.reset()
     window.scrollTo({ top: 0 })
   }
@@ -171,6 +175,34 @@ export default function ReportForm() {
         <FormSection number="1" title="What kind of hazard is it?" description="Choose the closest match.">
           <CategoryPicker value={values.category} error={errors.category} onChange={handleChange} />
         </FormSection>
+
+<FormSection
+  number="1"
+  title="How serious is this hazard?"
+  description="Select the level of danger you observe."
+>
+  <FormField
+    id="reported_severity"
+    label="Your severity assessment"
+    required
+    hint="Authorities will independently verify the official severity."
+  >
+    {(props) => (
+      <select
+        {...props}
+        name="reported_severity"
+        value={reportedSeverity}
+        onChange={(event) => setReportedSeverity(event.target.value)}
+        className="form-select"
+      >
+        <option value="low">Low - Minor risk</option>
+        <option value="medium">Medium - Moderate risk</option>
+        <option value="high">High - Serious risk</option>
+        <option value="critical">Critical - Immediate danger</option>
+      </select>
+    )}
+  </FormField>
+</FormSection>
 
         <FormSection number="2" title="Describe the hazard">
           <FormField
