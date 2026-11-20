@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 from app.auth import require_authority
 from app.database import get_db, utcnow
-from app.models import Hazard, HazardHistory
+from app.models import Hazard, HazardHistory, CitizenReport
 from app.schemas import (
     AuthorityDashboardStats,
     AuthorityHazardUpdate,
@@ -327,9 +327,57 @@ def list_authority_hazards(
         )
 
     # Attach the score and explanation to every returned hazard.
+    # Attach score, explanation, and citizen photo to every returned hazard.
     for hazard in hazards:
         hazard.priority_score = _priority(hazard)
         _attach_risk_details(hazard)
+
+        hazard.photo_path = db.scalar(
+            select(CitizenReport.photo_path)
+            .where(
+                CitizenReport.hazard_id == hazard.id,
+                CitizenReport.photo_path.isnot(None)
+            )
+            .order_by(CitizenReport.id.desc())
+            .limit(1)
+        )
+
+    # Get the latest citizen-submitted photo for this hazard
+    photo_reports = [
+        report for report in hazard.reports
+        if report.photo_path
+    ]
+
+    latest_photo_report = max(
+        photo_reports,
+        key=lambda report: report.id,
+        default=None
+    )
+
+    hazard.photo_path = (
+        latest_photo_report.photo_path
+        if latest_photo_report
+        else None
+    )
+
+    # Attach the latest available citizen photo to the hazard.
+    photo_reports = [
+        report
+        for report in hazard.reports
+        if report.photo_path
+    ]
+
+    latest_photo_report = max(
+        photo_reports,
+        key=lambda report: report.id,
+        default=None,
+    )
+
+    hazard.photo_path = (
+        latest_photo_report.photo_path
+        if latest_photo_report
+        else None
+    )
 
     db.commit()
 

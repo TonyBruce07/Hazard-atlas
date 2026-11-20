@@ -967,8 +967,61 @@ export default function AuthorityDashboard() {
           </button>
         </div>
 
-        {/* Risk breakdown will go here */}
+             
+        {/* Citizen-submitted photo */}
+<section
+  style={{
+    marginBottom: '24px',
+    padding: '18px',
+    border: '1px solid #dce4ef',
+    borderRadius: '12px',
+    background: '#f8fafc',
+    minWidth: 0,
+  }}
+>
+  <h3 style={{ margin: '0 0 12px', fontSize: '16px' }}>
+    Citizen-submitted photo
+  </h3>
 
+  {hazard.photo_path ? (
+    <>
+      <img
+        src={hazard.photo_path}
+        alt={`Citizen-submitted photo for hazard ${hazard.id}`}
+        style={{
+          display: 'block',
+          width: '100%',
+          maxWidth: '520px',
+          height: '260px',
+          objectFit: 'contain',
+          objectPosition: 'left center',
+          borderRadius: '8px',
+          background: '#eef2f7',
+        }}
+      />
+
+      <a
+        href={hazard.photo_path}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: 'inline-block',
+          marginTop: '10px',
+          color: '#2563eb',
+          fontSize: '14px',
+          fontWeight: 600,
+          textDecoration: 'none',
+        }}
+      >
+        View full image ↗
+      </a>
+    </>
+  ) : (
+    <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>
+      No photo attached to this report.
+    </p>
+  )}
+</section>
         <div className="authority-case-forms">
           <section className="authority-case-panel">
             <h3>Resolution details</h3>

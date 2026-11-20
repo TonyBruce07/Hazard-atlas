@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+
 _TMP = Path(tempfile.mkdtemp(prefix="hazardatlas-tests-"))
 UPLOAD_DIR = _TMP / "uploads"
 
@@ -24,3 +25,25 @@ def client():
     with TestClient(app) as test_client:  # the context manager runs startup (creates tables)
         yield test_client
     shutil.rmtree(_TMP, ignore_errors=True)
+
+
+@pytest.fixture(autouse=True)
+def mock_cloudinary(monkeypatch):
+    """Prevent automated API tests from making real Cloudinary requests."""
+    from app.services import upload_service
+
+    def fake_upload(data, **kwargs):
+        return {
+            "secure_url": (
+                "https://res.cloudinary.com/test-cloud/image/upload/"
+                "v123456789/hazardatlas/test-image.png"
+            ),
+            "public_id": "hazardatlas/test-image",
+        }
+
+    def fake_destroy(public_id, **kwargs):
+        return {"result": "ok"}
+
+    monkeypatch.setattr(upload_service.cloudinary.uploader, "upload", fake_upload)
+    monkeypatch.setattr(upload_service.cloudinary.uploader, "destroy", fake_destroy)
+    monkeypatch.setattr(upload_service,"_configure_cloudinary",lambda: None,)

@@ -70,27 +70,44 @@ def test_create_report_with_coordinates_and_photo(client):
     body = response.json()
     assert body["hazard"]["latitude"] == pytest.approx(12.971599)
     assert body["hazard"]["longitude"] == pytest.approx(77.594566)
-    assert body["photo_path"].endswith(".png")
+    assert body["photo_path"].startswith("https://res.cloudinary.com/")
     assert "holiday" not in body["photo_path"]
-    assert [f.name for f in stored_files()] == [body["photo_path"]]
+    assert stored_files() == []
+
 
 
 @pytest.mark.parametrize(
-    "filename,content,mime,ext",
-    [("a.jpg", make_jpeg(), "image/jpeg", ".jpg"), ("a.jpeg", make_jpeg(), "image/jpeg", ".jpg"), ("a.webp", make_webp(), "image/webp", ".webp")],
+    "filename,content,mime",
+    [
+        ("a.jpg", make_jpeg(), "image/jpeg"),
+        ("a.jpeg", make_jpeg(), "image/jpeg"),
+        ("a.webp", make_webp(), "image/webp"),
+    ],
 )
-def test_other_allowed_image_types(client, filename, content, mime, ext):
-    response = client.post("/api/reports", data=VALID_FORM, files={"photo": (filename, content, mime)})
-    assert response.status_code == 201
-    assert response.json()["photo_path"].endswith(ext)
+def test_other_allowed_image_types(client, filename, content, mime):
+    response = client.post(
+        "/api/reports",
+        data=VALID_FORM,
+        files={"photo": (filename, content, mime)},
+    )
+    assert response.status_code == 201, response.text
+    assert response.json()["photo_path"].startswith(
+        "https://res.cloudinary.com/"
+    )
 
 
 def test_hostile_filename_cannot_escape_upload_dir(client):
-    response = client.post("/api/reports", data=VALID_FORM, files={"photo": ("../../evil.png", make_png(), "image/png")})
-    assert response.status_code == 201
-    stored = response.json()["photo_path"]
-    assert "/" not in stored and "\\" not in stored and ".." not in stored
-    assert (UPLOAD_DIR / stored).is_file()
+    response = client.post(
+        "/api/reports",
+        data=VALID_FORM,
+        files={"photo": ("../../evil.png", make_png(), "image/png")},
+    )
+    assert response.status_code == 201, response.text
+
+    photo_url = response.json()["photo_path"]
+    assert photo_url.startswith("https://res.cloudinary.com/")
+    assert "evil" not in photo_url
+    assert stored_files() == []
 
 
 def test_blank_optional_fields_are_treated_as_missing(client):

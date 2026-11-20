@@ -52,9 +52,9 @@ class ReportRead(ORMModel):
     reported_severity: Severity
     description: str
     photo_path: Optional[str] = Field(
-        default=None,
-        description="Stored file name relative to the upload directory.",
-    )
+    default=None,
+    description="Cloudinary secure URL for the uploaded photo.",
+)
     created_at: UTCDatetime
     hazard: Optional[HazardRead] = None
 

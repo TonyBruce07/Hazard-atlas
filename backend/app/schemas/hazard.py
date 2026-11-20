@@ -51,6 +51,7 @@ class HazardRead(ORMModel):
 
     address: str
     city: str
+    photo_path: Optional[str] = None
 
     status: HazardStatus
     severity: Severity = Severity.MEDIUM

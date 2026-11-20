@@ -45,8 +45,8 @@ class CitizenReport(Base):
     description: Mapped[str] = mapped_column(Text)
 
     photo_path: Mapped[Optional[str]] = mapped_column(
-        String(255),
-        nullable=True,
+    Text,
+    nullable=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(
