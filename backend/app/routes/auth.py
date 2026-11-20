@@ -23,26 +23,39 @@ class LoginResponse(BaseModel):
 
 @router.post("/login", response_model=LoginResponse)
 def authority_login(credentials: LoginRequest):
-    username = os.getenv("AUTHORITY_USERNAME", "")
-    password_hash = os.getenv("AUTHORITY_PASSWORD_HASH", "")
+    accounts = [
+        (
+            os.getenv("AUTHORITY_USERNAME", ""),
+            os.getenv("AUTHORITY_PASSWORD_HASH", ""),
+        ),
+        (
+            os.getenv("JUDGE_AUTHORITY_USERNAME", ""),
+            os.getenv("JUDGE_AUTHORITY_PASSWORD_HASH", ""),
+        ),
+    ]
 
-    if not username or not password_hash:
+    configured_accounts = [
+        (username, password_hash)
+        for username, password_hash in accounts
+        if username and password_hash
+    ]
+
+    if not configured_accounts:
         raise HTTPException(
             status_code=503,
             detail="Authority login has not been configured.",
         )
 
-    valid_username = credentials.username == username
-    valid_password = verify_password(
-        credentials.password, password_hash
-    )
+    for username, password_hash in configured_accounts:
+        if (
+            credentials.username == username
+            and verify_password(credentials.password, password_hash)
+        ):
+            return LoginResponse(
+                access_token=create_access_token(username)
+            )
 
-    if not (valid_username and valid_password):
-        raise HTTPException(
-            status_code=401,
-            detail="Incorrect username or password.",
-        )
-
-    return LoginResponse(
-        access_token=create_access_token(username)
+    raise HTTPException(
+        status_code=401,
+        detail="Incorrect username or password.",
     )

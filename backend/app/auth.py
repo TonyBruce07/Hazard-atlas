@@ -84,7 +84,15 @@ def verify_access_token(token: str) -> str | None:
             return None
 
         username = payload.get("sub")
-        if not username or username != os.getenv("AUTHORITY_USERNAME"):
+
+        allowed_usernames = {
+            os.getenv("AUTHORITY_USERNAME", ""),
+            os.getenv("JUDGE_AUTHORITY_USERNAME", ""),
+        }
+
+        allowed_usernames.discard("")
+
+        if not username or username not in allowed_usernames:
             return None
 
         return username
